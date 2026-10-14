@@ -44,6 +44,25 @@ class LaserClusterHelper : public SubsysReco
     void set_garfield_keffside0(double use) { m_garfield_keffside0 = use; m_manual_garfield_keffside0 = true; }
     void set_garfield_keffside1(double use) { m_garfield_keffside1 = use; m_manual_garfield_keffside1 = true; }
     void set_garfield_stepns(double use) { m_garfield_stepns = use; }
+
+    //! 2D (axisymmetric) space-charge E-field map; empty = CDB Tpc_PolySeeding_EField
+    void set_garfield_efieldmap(const std::string &file) { m_garfield_efieldmap = file; }
+    //! side-separated 3D space-charge E-field maps; takes precedence over the 2D map
+    void set_garfield_efieldmap3d(const std::string &side0, const std::string &side1)
+    {
+      m_garfield_efieldmap3d[0] = side0;
+      m_garfield_efieldmap3d[1] = side1;
+    }
+
+    //! TPC placement used by PHGarfield for global <-> TPC-frame transforms
+    enum class GarfieldTpcGeometry
+    {
+      HardcodedSurvey = 0,  //! fixed endcap-survey numbers (previous default)
+      GeomContainer = 1,    //! place/rot from TPCGEOMCONTAINER, same transform as ActsGeometry
+      Perfect = 2           //! no displacement, no tilt
+    };
+    void set_garfield_tpc_geometry(GarfieldTpcGeometry geom) { m_garfield_tpc_geometry = geom; }
+
   private:
 
     ActsGeometry *m_tGeometry{nullptr};
@@ -62,6 +81,9 @@ class LaserClusterHelper : public SubsysReco
     double m_garfield_keffside0{1.0};
     double m_garfield_keffside1{1.0};
     double m_garfield_stepns{50.0};
+    std::string m_garfield_efieldmap;
+    std::array<std::string, 2> m_garfield_efieldmap3d;
+    GarfieldTpcGeometry m_garfield_tpc_geometry{GarfieldTpcGeometry::HardcodedSurvey};
 
 
 };

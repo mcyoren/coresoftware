@@ -50,7 +50,8 @@ pkginclude_HEADERS = \
   TpcSpaceChargeReconstructionHelper.h \
   PHTpcResiduals.h \
   TpcCentralMembraneMatching.h \
-  TpcLaminationFitting.h
+  TpcLaminationFitting.h \
+  TpcGeometryOverride.h
 
 
 ROOTDICTS = \
@@ -78,7 +79,8 @@ libtpccalib_la_SOURCES = \
   TpcSpaceChargeReconstructionHelper.cc \
   PHTpcResiduals.cc \
   TpcCentralMembraneMatching.cc \
-  TpcLaminationFitting.cc
+  TpcLaminationFitting.cc \
+  TpcGeometryOverride.cc
 
 # Rule for generating table CINT dictionaries.
 %_Dict.cc: %.h %LinkDef.h

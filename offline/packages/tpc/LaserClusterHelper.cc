@@ -55,7 +55,6 @@ void LaserClusterHelper::loadNodes(PHCompositeNode* topNode)
 
     if(m_useGarfield)
     {
-        const std::string m_spacechargefieldmap = CDBInterface::instance()->getUrl("Tpc_PolySeeding_EField");
         const auto kefffile = CDBInterface::instance()->getUrl("Tpc_PolyClusterizer_kEff");
         if (!kefffile.empty())
         {
@@ -66,14 +65,51 @@ void LaserClusterHelper::loadNodes(PHCompositeNode* topNode)
         }
 
         m_phgarfield = std::make_unique<PHGarfield>();
-        m_phgarfield->SetElectricFieldMap(m_spacechargefieldmap);
-        ROOT::Math::XYZVector Northxyz(-0.001, -0.001, 1123.109);
-        ROOT::Math::XYZVector Southxyz(-3.354, -0.673, -1137.382);
-        ROOT::Math::XYZVector center = 0.5 * (Northxyz + Southxyz);
-        center *= 0.1;  // mm to cm
-        m_phgarfield->MoveTpc(center.X(), center.Y(), center.Z());
-        m_phgarfield->RotateTpc(0, 0.001485, 0);
-        m_phgarfield->RotateTpc(0.000298, 0, 0);
+        // private instance: several matchers with different settings can run in one job
+        m_phgarfield->SetPublishToNodeTree(false);
+
+        if (!m_garfield_efieldmap3d[0].empty() && !m_garfield_efieldmap3d[1].empty())
+        {
+            m_phgarfield->SetElectricFieldMap3D(m_garfield_efieldmap3d[0], m_garfield_efieldmap3d[1]);
+        }
+        else
+        {
+            const std::string spacechargefieldmap = m_garfield_efieldmap.empty() ? CDBInterface::instance()->getUrl("Tpc_PolySeeding_EField") : m_garfield_efieldmap;
+            m_phgarfield->SetElectricFieldMap(spacechargefieldmap);
+        }
+
+        switch (m_garfield_tpc_geometry)
+        {
+        case GarfieldTpcGeometry::HardcodedSurvey:
+        {
+            ROOT::Math::XYZVector Northxyz(-0.001, -0.001, 1123.109);
+            ROOT::Math::XYZVector Southxyz(-3.354, -0.673, -1137.382);
+            ROOT::Math::XYZVector center = 0.5 * (Northxyz + Southxyz);
+            center *= 0.1;  // mm to cm
+            m_phgarfield->MoveTpc(center.X(), center.Y(), center.Z());
+            m_phgarfield->RotateTpc(0, 0.001485, 0);
+            m_phgarfield->RotateTpc(0.000298, 0, 0);
+            break;
+        }
+        case GarfieldTpcGeometry::GeomContainer:
+            // PHGarfield::LoadCDBInputs reads place/rot of TPCGEOMCONTAINER layer 20
+            m_phgarfield->SetUseSurveyGeometry(true);
+            break;
+        case GarfieldTpcGeometry::Perfect:
+            m_phgarfield->SetUseSurveyGeometry(false);
+            m_phgarfield->MoveTpc(0, 0, 0);
+            break;
+        }
+
+        std::cout << "LaserClusterHelper::loadNodes - PHGarfield config:"
+                  << " efield2D=" << m_garfield_efieldmap
+                  << " efield3D=" << m_garfield_efieldmap3d[0] << "," << m_garfield_efieldmap3d[1]
+                  << " keff=" << m_garfield_keffside0 << "," << m_garfield_keffside1
+                  << " tpcGeometry=" << static_cast<int>(m_garfield_tpc_geometry)
+                  << " cmVoltage=" << m_garfield_cmvoltage
+                  << " zeroField=" << m_garfield_zerofield
+                  << " stepns=" << m_garfield_stepns << std::endl;
+
         m_phgarfield->SetCMVoltageDefault(m_garfield_cmvoltage);
         m_phgarfield->SetZeroField(m_garfield_zerofield);
         m_phgarfield->SetSpaceChargeScaleSide0(m_garfield_keffside0);

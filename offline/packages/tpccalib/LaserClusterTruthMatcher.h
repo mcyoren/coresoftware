@@ -9,6 +9,7 @@
 
 #include <fun4all/SubsysReco.h>
 
+#include <array>
 #include <map>
 #include <string>
 #include <vector>
@@ -81,6 +82,16 @@ class LaserClusterTruthMatcher : public SubsysReco
   void set_garfield_keffside0(double use) { m_garfield_keffside0 = use; m_manual_garfield_keffside0 = true; }
   void set_garfield_keffside1(double use) { m_garfield_keffside1 = use; m_manual_garfield_keffside1 = true;}
   void set_garfield_stepns(double use) { m_garfield_stepns = use; }
+  //! 2D space-charge E-field map; empty = CDB Tpc_PolySeeding_EField
+  void set_garfield_efieldmap(const std::string &file) { m_garfield_efieldmap = file; }
+  //! side-separated 3D space-charge E-field maps; take precedence over the 2D map
+  void set_garfield_efieldmap3d(const std::string &side0, const std::string &side1)
+  {
+    m_garfield_efieldmap3d[0] = side0;
+    m_garfield_efieldmap3d[1] = side1;
+  }
+  //! TPC placement used inside PHGarfield (hardcoded survey, TPCGEOMCONTAINER, or perfect)
+  void set_garfield_tpc_geometry(LaserClusterHelper::GarfieldTpcGeometry geom) { m_garfield_tpc_geometry = geom; }
 
   void set_QABase(const std::string &name) { m_QABase = name; }
 
@@ -111,6 +122,9 @@ class LaserClusterTruthMatcher : public SubsysReco
   double m_garfield_keffside0{1.0};
   double m_garfield_keffside1{1.0};
   double m_garfield_stepns{50.0};
+  std::string m_garfield_efieldmap;
+  std::array<std::string, 2> m_garfield_efieldmap3d;
+  LaserClusterHelper::GarfieldTpcGeometry m_garfield_tpc_geometry{LaserClusterHelper::GarfieldTpcGeometry::HardcodedSurvey};
 
   std::string m_distortionOutputfile{"CMDistortionCorrections.root"};
 

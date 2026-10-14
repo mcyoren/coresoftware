@@ -1471,6 +1471,9 @@ int LaserClusterTruthMatcher::getNodes(PHCompositeNode *topNode)
     if(m_manual_garfield_keffside0){ m_laserClusterHelper.set_garfield_keffside0(m_garfield_keffside0); }
     if(m_manual_garfield_keffside1){ m_laserClusterHelper.set_garfield_keffside1(m_garfield_keffside1); }
     m_laserClusterHelper.set_garfield_stepns(m_garfield_stepns);
+    m_laserClusterHelper.set_garfield_efieldmap(m_garfield_efieldmap);
+    m_laserClusterHelper.set_garfield_efieldmap3d(m_garfield_efieldmap3d[0], m_garfield_efieldmap3d[1]);
+    m_laserClusterHelper.set_garfield_tpc_geometry(m_garfield_tpc_geometry);
   }
   m_laserClusterHelper.loadNodes(topNode);
 
